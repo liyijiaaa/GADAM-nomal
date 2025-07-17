@@ -161,28 +161,30 @@ class GlobalModel(nn.Module):
         h = nei*mean_h + (1-nei)*h
         return h
 
-    # def forward(self, feats, epoch):
-    #     h, mean_h = self.encoder(feats)
-    #
-    #     post_attn = self.post_attention(h, mean_h)
-    #     beta = math.pow(self.beta, epoch)
-    #     if beta < 0.1:
-    #         beta = 0.
-    #     attn = beta*self.pre_attn + (1-beta)*post_attn
-    #
-    #     h = self.msg_pass(h, mean_h, attn)
-    #
-    #     scores = self.discriminator(h, self.center)
-    #
-    #     pos_center_simi = scores[self.nor_idx]
-    #     neg_center_simi = scores[self.ano_idx]
-    #
-    #     pos_center_loss = self.loss(pos_center_simi, torch.ones_like(pos_center_simi, dtype=torch.float32))
-    #     neg_center_loss = self.loss(neg_center_simi, torch.zeros_like(neg_center_simi, dtype=torch.float32))
-    #
-    #     center_loss = pos_center_loss + neg_center_loss
-    #
-    #     return center_loss, scores
+    def forward(self, feats, epoch):
+        h, mean_h = self.encoder(feats)
+
+        post_attn = self.post_attention(h, mean_h)
+        beta = math.pow(self.beta, epoch)
+        if beta < 0.1:
+            beta = 0.
+        attn = beta*self.pre_attn + (1-beta)*post_attn
+
+        h = self.msg_pass(h, mean_h, attn)
+
+        scores = self.discriminator(h, self.center)
+
+        pos_center_simi = scores[self.nor_idx]
+        neg_center_simi = scores[self.ano_idx]
+
+        pos_center_loss = self.loss(pos_center_simi, torch.ones_like(pos_center_simi, dtype=torch.float32))
+        neg_center_loss = self.loss(neg_center_simi, torch.zeros_like(neg_center_simi, dtype=torch.float32))
+
+        center_loss = pos_center_loss + neg_center_loss
+
+        return center_loss, scores
+
+
     def forward(self, feats, epoch, ada_neighbor_nodes):
         # h, mean_h = self.encoder(feats)
         h, _ = self.encoder(feats)
@@ -192,8 +194,8 @@ class GlobalModel(nn.Module):
         beta = math.pow(self.beta, epoch)
         if beta < 0.1:
             beta = 0.
-        # attn = beta * self.pre_attn + (1 - beta) * post_attn
-        attn = post_attn
+        attn = beta * self.pre_attn + (1 - beta) * post_attn
+        #attn = post_attn
         h = self.msg_pass(h, mean_h, attn)
 
         scores = self.discriminator(h, self.center)
